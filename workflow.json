@@ -1,0 +1,787 @@
+{
+  "name": "Slack Emoji → Notion Backlog - v1.0",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "slack-reaction",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7e6146dd-7762-4e49-89e0-9274b05ce118",
+      "name": "Trigger - Slack Reaction Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        336,
+        176
+      ],
+      "webhookId": "a64a3b9b-b23b-4475-ae64-4efea79a07b7"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body.challenge ? JSON.stringify({ challenge: $json.body.challenge }) : \"{}\" }}",
+        "options": {}
+      },
+      "id": "4c7d6310-dbdf-4720-ba40-31203218f282",
+      "name": "Respond - Acknowledge Slack",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "emoji",
+              "value": "={{ $json.body.event.reaction }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "message_ts",
+              "value": "={{ $json.body.event.item.ts }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "channel_id",
+              "value": "={{ $json.body.event.item.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "user_id",
+              "value": "={{ $json.body.event.user }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "36c9ae64-b6c1-43ba-a6a0-ae31d62f8683",
+      "name": "Set - Normalize Slack Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "red_circle",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "clipboard",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c3",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "bulb",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c4",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "dart",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c5",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "mortar_board",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c6",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "busts_in_silhouette",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c7",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "pushpin",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "03c1d604-8d66-46bd-bb7a-21ab522dc4d2",
+      "name": "Check - Is Any Tracked Emoji",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        832,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "p1",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "red_circle",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "p2",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "clipboard",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "p3",
+              "leftValue": "={{ $json.emoji }}",
+              "rightValue": "bulb",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "06d60d78-b41e-4ceb-8a5f-ecf578e2c888",
+      "name": "Check - Priority or Category",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "channel",
+              "value": "={{ $json.channel_id }}"
+            },
+            {
+              "name": "latest",
+              "value": "={{ $json.message_ts }}"
+            },
+            {
+              "name": "inclusive",
+              "value": "true"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {},
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "2bbf1337-d565-49c8-9334-c40c626e185b",
+      "name": "HTTP Request - Get Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1424,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "message_text",
+              "value": "={{ $('HTTP Request - Get Message').item.json.messages[0].text || ($('HTTP Request - Get Message').item.json.messages[0].attachments && $('HTTP Request - Get Message').item.json.messages[0].attachments[0] && $('HTTP Request - Get Message').item.json.messages[0].attachments[0].text) || ($('HTTP Request - Get Message').item.json.messages[0].attachments && $('HTTP Request - Get Message').item.json.messages[0].attachments[0] && $('HTTP Request - Get Message').item.json.messages[0].attachments[0].fallback) || 'Untitled' }}",
+              "type": "string"
+            },
+            {
+              "id": "d2",
+              "name": "message_url",
+              "value": "=https://slack.com/archives/{{ $('Set - Normalize Slack Payload').item.json.channel_id }}/p{{ $('Set - Normalize Slack Payload').item.json.message_ts.replace('.','') }}",
+              "type": "string"
+            },
+            {
+              "id": "d3",
+              "name": "trigger_emoji",
+              "value": "={{ $('Set - Normalize Slack Payload').item.json.emoji }}",
+              "type": "string"
+            },
+            {
+              "id": "d4",
+              "name": "captured_at",
+              "value": "={{ new Date().toISOString().split('T')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "d5",
+              "name": "priority_status",
+              "value": "={{ $('Set - Normalize Slack Payload').item.json.emoji === 'red_circle' ? 'Important' : $('Set - Normalize Slack Payload').item.json.emoji === 'clipboard' ? 'Urgent' : 'Ideas' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "232deea1-ae86-445d-b467-e9d77ea6f919",
+      "name": "Set - Build Create Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1664,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "e1",
+              "leftValue": "={{ $json.message_text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "abd55dd3-0804-473f-a5d8-64fd3764d1ed",
+      "name": "Check - Message Not Empty",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "YOUR_NOTION_DATABASE_ID",
+          "mode": "id"
+        },
+        "title": "={{ $json.message_text.slice(0, 100) }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "={{ $json.priority_status }}"
+            },
+            {
+              "key": "Source|url",
+              "urlValue": "={{ $json.message_url }}"
+            },
+            {
+              "key": "Captured on|date",
+              "date": "={{ $json.captured_at }}"
+            },
+            {
+              "key": "Trigger emoji|rich_text",
+              "textContent": "={{ $json.trigger_emoji }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "50c14a28-b5cc-4ea2-b29b-a3608e27637c",
+      "name": "Notion - Create Page",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "log_status",
+              "value": "Created",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "82fa58b6-9d42-4fe5-ab07-4481998514a2",
+      "name": "Log - Page Created",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2416,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "g1",
+              "name": "error_reason",
+              "value": "Empty message — could not retrieve text from Slack",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "611b0164-be9a-42ad-9f19-71c5572603a9",
+      "name": "Set - Log Empty Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1920,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "k1",
+              "name": "category",
+              "value": "={{ $json.emoji === 'dart' ? 'Content' : $json.emoji === 'mortar_board' ? 'Academy' : $json.emoji === 'busts_in_silhouette' ? 'Community' : 'Other' }}",
+              "type": "string"
+            },
+            {
+              "id": "k2",
+              "name": "message_url",
+              "value": "=https://slack.com/archives/{{ $json.channel_id }}/p{{ $json.message_ts.replace('.','') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5a3c746f-840b-411a-9c24-4b3b4751f229",
+      "name": "Set - Build Category Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1424,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "YOUR_NOTION_DATABASE_ID",
+          "mode": "id"
+        },
+        "limit": 1,
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Source|url",
+              "condition": "equals",
+              "urlValue": "={{ $json.message_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd41417c-edce-448c-9270-e23ea545d3d5",
+      "name": "Notion - Search Existing Page",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "q1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1908d798-c2fc-4cdc-9d26-a3c5e3732e07",
+      "name": "Check - Page Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Category|select",
+              "selectValue": "={{ $('Set - Build Category Payload').item.json.category }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a8d38188-5cba-4464-ab91-263885281d6e",
+      "name": "Notion - Update Category",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m1",
+              "name": "log_status",
+              "value": "Category updated",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5ba5dc8b-e14d-4da2-94c0-bbff44139b58",
+      "name": "Log - Category Updated",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2416,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "n1",
+              "name": "log_status",
+              "value": "Page not found",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0ce7bb01-7d8d-4ed3-89aa-b1d1c309d99f",
+      "name": "Log - Page Not Found",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2160,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "skip_reason",
+              "value": "Not a tracked emoji",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1680d1da-8d75-4b4c-8d46-d43c81fc3562",
+      "name": "Set - Log Ignored Emoji",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        512
+      ]
+    }
+  ],
+  "connections": {
+    "Trigger - Slack Reaction Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond - Acknowledge Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set - Normalize Slack Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Normalize Slack Payload": {
+      "main": [
+        [
+          {
+            "node": "Check - Is Any Tracked Emoji",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check - Is Any Tracked Emoji": {
+      "main": [
+        [
+          {
+            "node": "Check - Priority or Category",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set - Log Ignored Emoji",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check - Priority or Category": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Get Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set - Build Category Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Get Message": {
+      "main": [
+        [
+          {
+            "node": "Set - Build Create Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Build Create Payload": {
+      "main": [
+        [
+          {
+            "node": "Check - Message Not Empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check - Message Not Empty": {
+      "main": [
+        [
+          {
+            "node": "Notion - Create Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set - Log Empty Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion - Create Page": {
+      "main": [
+        [
+          {
+            "node": "Log - Page Created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Build Category Payload": {
+      "main": [
+        [
+          {
+            "node": "Notion - Search Existing Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion - Search Existing Page": {
+      "main": [
+        [
+          {
+            "node": "Check - Page Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check - Page Found": {
+      "main": [
+        [
+          {
+            "node": "Notion - Update Category",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log - Page Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion - Update Category": {
+      "main": [
+        [
+          {
+            "node": "Log - Category Updated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
